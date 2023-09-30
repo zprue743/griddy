@@ -84,8 +84,11 @@ class RulerOverlay(QWidget):
         self.old_pos = event.globalPos()
 
 def manage_gif():
-    gif_process = subprocess.Popen(["python", "griddy_gif.py"])
-    return gif_process
+    try:
+        gif_process = subprocess.Popen(["python", "griddy_gif.py"])
+        return gif_process
+    except:
+        return None
 
 if __name__ == '__main__':
     gif_process = manage_gif()
@@ -95,4 +98,5 @@ if __name__ == '__main__':
     app.exec_()
 
     # Terminate the gif subprocess when the QApplication exits if it is still open
-    gif_process.terminate()
+    if gif_process:
+        gif_process.terminate()
