@@ -1,2 +1,2 @@
 # griddy
- grid overlay for windows
+ Simple ruler/grid overlay for windows
