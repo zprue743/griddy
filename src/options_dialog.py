@@ -78,44 +78,62 @@ class OptionsDialog(QDialog):
             self.enable_grid()
 
     def save_config(self):
-        config = configparser.ConfigParser()
-        config.read(self.config_path)
+        try:
+            if not os.path.exists(self.config_path):
+                self.create_config_file()
 
-        # Update the values in the existing "Settings" section or create a new one
-        if 'Settings' not in config:
-            config['Settings'] = {}
+            config = configparser.ConfigParser()
+            config.read(self.config_path)
 
-        config['Settings']['Opacity'] = str(self.opacity_slider.value())
-        config['Settings']['Grid_Enabled'] = str(int(self.grid_checkbox.isChecked()))
-        config['Settings']['Grid_Size'] = str(self.grid_size_spinbox.value())
-        config['Settings']['Line_Color'] = str(self.parent().line_color.getRgb())
+            # Update the values in the existing "Settings" section or create a new one
+            if 'Settings' not in config:
+                config['Settings'] = {}
 
-        with open(self.config_path, 'w') as configfile:
-            config.write(configfile)
+            config['Settings']['Opacity'] = str(self.opacity_slider.value())
+            config['Settings']['Grid_Enabled'] = str(int(self.grid_checkbox.isChecked()))
+            config['Settings']['Grid_Size'] = str(self.grid_size_spinbox.value())
+            config['Settings']['Line_Color'] = str(self.parent().line_color.getRgb())
+
+            with open(self.config_path, 'w') as configfile:
+                config.write(configfile)
+        except Exception as e:
+            print(f'An error occurred while saving the config file: {e}')
 
     def load_config(self):
-        config = configparser.ConfigParser()
-        config.read(self.config_path)
+        try:
+            if not os.path.exists(self.config_path):
+                self.create_config_file()
+            config = configparser.ConfigParser()
+            config.read(self.config_path)
 
-        self.opacity_slider.setValue(config.getint('Settings', 'opacity'))
-        self.grid_checkbox.setChecked(config.getboolean('Settings', 'grid_enabled'))
-        self.grid_size_spinbox.setValue(config.getint('Settings', 'grid_size'))
-        line_color_values = tuple(map(int, config.get('Settings', 'line_color').strip('() ').split(',')))
-        line_color = QColor(*line_color_values)
-        self.parent().line_color = line_color
-        self.update_main_window()
+            self.opacity_slider.setValue(config.getint('Settings', 'opacity'))
+            self.grid_checkbox.setChecked(config.getboolean('Settings', 'grid_enabled'))
+            self.grid_size_spinbox.setValue(config.getint('Settings', 'grid_size'))
+            line_color_values = tuple(map(int, config.get('Settings', 'line_color').strip('() ').split(',')))
+            line_color = QColor(*line_color_values)
+            self.parent().line_color = line_color
+            self.update_main_window()
+
+        except Exception as e:
+            print(f'An error occurred while loading the config file: {e}')
 
     def reset_config(self):
-        config = configparser.ConfigParser()
-        config.read(self.config_path)
+        try:
+            if not os.path.exists(self.config_path):
+                self.create_config_file()
+            config = configparser.ConfigParser()
+            config.read(self.config_path)
 
-        self.opacity_slider.setValue(config.getint('Default', 'opacity'))
-        self.grid_checkbox.setChecked(config.getboolean('Default', 'grid_enabled'))
-        self.grid_size_spinbox.setValue(config.getint('Default', 'grid_size'))
-        line_color_values = tuple(map(int, config.get('Default', 'line_color').strip('() ').split(',')))
-        line_color = QColor(*line_color_values)
-        self.parent().line_color = line_color
-        self.update_main_window()
+            self.opacity_slider.setValue(config.getint('Default', 'opacity'))
+            self.grid_checkbox.setChecked(config.getboolean('Default', 'grid_enabled'))
+            self.grid_size_spinbox.setValue(config.getint('Default', 'grid_size'))
+            line_color_values = tuple(map(int, config.get('Default', 'line_color').strip('() ').split(',')))
+            line_color = QColor(*line_color_values)
+            self.parent().line_color = line_color
+            self.update_main_window()
+        
+        except Exception as e:
+            print(f'An error occurred while resetting the config: {e}')
 
     def pick_color(self):
         try:
@@ -134,11 +152,25 @@ class OptionsDialog(QDialog):
         self.parent().is_grid_enabled = False
         self.update_main_window()
 
-    def apply_config(self):
-        self.parent().grid_size = self.grid_size
-        self.parent().grid_enabled = self.grid_enabled
-        self.parent().setWindowOpacity(self.opacity)
-        self.update_main_window()
+    def create_config_file(self):
+        os.mkdir(os.path.split(self.config_path)[0])
+        config = configparser.ConfigParser()
+
+        config['Settings'] = {}
+        config['Default'] = {}
+
+        config['Settings']['Opacity'] = '50'
+        config['Settings']['Grid_Enabled'] = '0'
+        config['Settings']['Grid_Size'] = '40'
+        config['Settings']['Line_Color'] = '(0, 255, 0, 255)'
+
+        config['Default']['Opacity'] = '50'
+        config['Default']['Grid_Enabled'] = '0'
+        config['Default']['Grid_Size'] = '40'
+        config['Default']['Line_Color'] = '(0, 255, 0, 255)'
+
+        with open(self.config_path, 'w') as configfile:
+                config.write(configfile)
 
     def grid_state_changed(self, state):
         if state == Qt.Checked:

@@ -108,7 +108,7 @@ class RulerOverlay(QWidget):
 
 def manage_gif():
     try:
-        gif_process = subprocess.Popen(["python", "./src/griddy_gif.py"])
+        gif_process = subprocess.Popen(["python", "griddy_gif.py"])
         return gif_process
     except:
         return None
