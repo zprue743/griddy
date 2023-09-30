@@ -85,7 +85,7 @@ class RulerOverlay(QWidget):
         painter.drawLine(0, inverted_h_value, self.width(), inverted_h_value)
 
         if self.is_grid_enabled:
-            for i in range(0, self.width(), self.grid_size):  # Assuming a grid spacing of 50 pixels
+            for i in range(0, self.width(), self.grid_size):
                 painter.drawLine(i, 0, i, self.height())
             for j in range(0, self.height(), self.grid_size):
                 painter.drawLine(0, j, self.width(), j)
