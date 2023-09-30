@@ -1,4 +1,5 @@
 import sys
+import subprocess
 from PyQt5.QtWidgets import QApplication, QWidget, QSlider, QVBoxLayout, QHBoxLayout, QPushButton
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor, QScreen
@@ -7,7 +8,6 @@ class RulerOverlay(QWidget):
     def __init__(self):
         super().__init__()
 
-        # Get screen size
         screen: QScreen = QApplication.primaryScreen()
         screen_size = screen.size()
 
@@ -27,7 +27,6 @@ class RulerOverlay(QWidget):
         self.v_slider.setValue(screen_size.width() // 2)  # Set to center
         self.v_slider.valueChanged.connect(self.update)
 
-        # Exit button
         self.exit_button = QPushButton("Exit", self)
         self.exit_button.clicked.connect(QApplication.quit)
 
@@ -65,14 +64,12 @@ class RulerOverlay(QWidget):
         # Calculate slider handle positions
         v_ratio = self.v_slider.value() / self.v_slider.maximum()
         v_handle_x = int(v_ratio * self.v_slider.width())
-        h_ratio = 1 - (self.h_slider.value() / self.h_slider.maximum())  # Invert the ratio for horizontal slider
-        h_handle_y = int(h_ratio * self.h_slider.height())
 
         # Draw draggable lines
         painter.setPen(QPen(QColor(0, 255, 0), 2))
         painter.drawLine(self.v_slider.value(), 0, self.v_slider.value(), self.height())
 
-        inverted_h_value = self.height() - self.h_slider.value()  # Invert the value for horizontal slider
+        inverted_h_value = self.height() - self.h_slider.value()
         painter.drawLine(0, inverted_h_value, self.width(), inverted_h_value)
 
 
@@ -86,8 +83,16 @@ class RulerOverlay(QWidget):
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.old_pos = event.globalPos()
 
+def manage_gif():
+    gif_process = subprocess.Popen(["python", "griddy_gif.py"])
+    return gif_process
+
 if __name__ == '__main__':
+    gif_process = manage_gif()
     app = QApplication(sys.argv)
     window = RulerOverlay()
     window.show()
-    sys.exit(app.exec_())
+    app.exec_()
+
+    # Terminate the gif subprocess when the QApplication exits if it is still open
+    gif_process.terminate()
