@@ -1,8 +1,9 @@
 import sys
 import subprocess
-from PyQt5.QtWidgets import QApplication, QWidget, QSlider, QVBoxLayout, QHBoxLayout, QPushButton, QColorDialog, QLabel, QDialog, QCheckBox, QSpinBox
+from PyQt5.QtWidgets import QApplication, QWidget, QSlider, QVBoxLayout, QHBoxLayout, QPushButton, QColorDialog
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor, QScreen
+from options_dialog import OptionsDialog
 
 class RulerOverlay(QWidget):
     def __init__(self):
@@ -18,6 +19,7 @@ class RulerOverlay(QWidget):
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         # Default values
+        self.is_grid_enabled = False
         self.grid_size = 40  # Default to 50 pixels
         self.line_color = QColor(0, 255, 0)  # Default to green
 
@@ -34,11 +36,6 @@ class RulerOverlay(QWidget):
         # Options Button
         self.options_button = QPushButton("Options", self)
         self.options_button.clicked.connect(self.show_options_dialog)
-        self.is_grid_enabled = False
-        
-        # Color Picker
-        self.color_button = QPushButton("Pick Color", self)
-        self.color_button.clicked.connect(self.pick_color)
 
         # Exit Button
         self.exit_button = QPushButton("Exit", self)
@@ -51,7 +48,6 @@ class RulerOverlay(QWidget):
         h_layout.addWidget(self.h_slider)
         h_layout.addStretch()
         h_layout.addWidget(self.options_button)
-        h_layout.addWidget(self.color_button)
         h_layout.addWidget(self.exit_button) 
 
         layout.addLayout(h_layout)
@@ -104,90 +100,11 @@ class RulerOverlay(QWidget):
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.old_pos = event.globalPos()
 
-    def pick_color(self):
-        try:
-            color_dialog = QColorDialog(self)
-            if color_dialog.exec_() == QColorDialog.Accepted:
-                self.line_color = color_dialog.selectedColor()
-                self.update()  # Force a repaint
-        except Exception as e:
-            print(f"Exception encountered: {e}")
-
     def show_options_dialog(self):
-        dialog = OptionsDialog(self)
-        dialog.exec_()
-
-    def enable_grid(self):
-        self.is_grid_enabled = True
-        self.update()  # To trigger a repaint
-
-    def disable_grid(self):
-        self.is_grid_enabled = False
-        self.update()
+        options_dialog = OptionsDialog(self)
+        options_dialog.exec_()
 
 # End RulerOverlay class
-
-# OptionsDialog Class
-class OptionsDialog(QDialog):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowTitle("Options")
-        self.resize(300, 200)
-
-        # Main layout for the dialog
-        self.layout = QVBoxLayout()
-
-        # Opacity Slider
-        self.opacity_slider = QSlider(Qt.Horizontal)
-        self.opacity_slider.setRange(0, 100)
-        self.opacity_slider.setValue(int(parent.windowOpacity() * 100))
-        self.opacity_slider.valueChanged.connect(self.adjust_opacity)
-        self.opacity_label = QLabel(f"Opacity: {self.opacity_slider.value()}%")
-
-        # Grid option
-        self.grid_checkbox = QCheckBox("Show Grid Overlay", self)
-        self.grid_checkbox.setChecked(parent.is_grid_enabled)
-
-        self.grid_size_spinbox = QSpinBox(self)
-        self.grid_size_spinbox.setRange(10, 200)
-        self.grid_size_spinbox.setValue(parent.grid_size)
-        self.grid_size_spinbox.setSuffix(" px")
-        self.grid_size_spinbox.valueChanged.connect(self.grid_size_changed)
-
-        # Apply Changes button
-        self.apply_button = QPushButton("Apply Changes", self)
-        self.apply_button.clicked.connect(self.apply_changes)
-
-        # Add grid-related options to the layout
-        grid_layout = QVBoxLayout()
-        grid_layout.addWidget(self.grid_checkbox)
-        grid_layout.addWidget(self.grid_size_spinbox)
-
-        # Add widgets to the main layout
-        self.layout.addWidget(self.opacity_label)
-        self.layout.addWidget(self.opacity_slider)
-        self.layout.addLayout(grid_layout)
-        self.layout.addWidget(self.apply_button)
-
-        # Set the main layout for the dialog
-        self.setLayout(self.layout)
-
-    def adjust_opacity(self, value):
-        opacity = 0.10 + (value / 100) * 0.9  # Min value of 10% to prevent invisible menu
-        self.parent().setWindowOpacity(opacity)
-        self.opacity_label.setText(f"Opacity: {int(opacity*100)}%")
-
-    def grid_size_changed(self):
-        self.parent().grid_size = self.grid_size_spinbox.value()
-        if self.grid_checkbox.isChecked():
-            self.parent().enable_grid()
-
-    def apply_changes(self):
-        if self.grid_checkbox.isChecked():
-            self.parent().enable_grid()
-        else:
-            self.parent().disable_grid()
-        self.accept()  # Close the dialog if using QDialog
 
 def manage_gif():
     try:
