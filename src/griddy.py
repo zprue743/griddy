@@ -20,7 +20,7 @@ class RulerOverlay(QWidget):
 
         # Default values
         self.is_grid_enabled = False
-        self.grid_size = 40  # Default to 50 pixels
+        self.grid_size = 40  # Default to 40 pixels
         self.line_color = QColor(0, 255, 0)  # Default to green
 
         # Horizontal and Vertical Sliders
