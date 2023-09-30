@@ -71,8 +71,6 @@ class RulerOverlay(QWidget):
 
         inverted_h_value = self.height() - self.h_slider.value()
         painter.drawLine(0, inverted_h_value, self.width(), inverted_h_value)
-
-
         painter.end()
 
     def mousePressEvent(self, event):
