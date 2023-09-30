@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from itertools import cycle
 from PIL import Image, ImageTk
@@ -40,7 +41,9 @@ def center_window(root, width=None, height=None):
 def display_animated_gif():
     root = tk.Tk()
     root.title("Animated GIF Display")
-    label = AnimatedGif(root, "griddy.gif", fps=15)
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    gif_path = os.path.join(base_dir, "assets", "griddy.gif")
+    label = AnimatedGif(root, gif_path, fps=15)
     label.pack()
     
     # Center the window after the mainloop starts
