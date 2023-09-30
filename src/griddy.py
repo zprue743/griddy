@@ -1,6 +1,6 @@
 import sys
 import subprocess
-from PyQt5.QtWidgets import QApplication, QWidget, QSlider, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QWidget, QSlider, QVBoxLayout, QHBoxLayout, QPushButton, QColorDialog
 from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtGui import QPainter, QPen, QColor, QScreen
 
@@ -27,6 +27,12 @@ class RulerOverlay(QWidget):
         self.v_slider.setValue(screen_size.width() // 2)  # Set to center
         self.v_slider.valueChanged.connect(self.update)
 
+        # Color Picker
+        self.line_color = QColor(0, 255, 0)  # Default to green
+        self.color_button = QPushButton("Pick Color", self)
+        self.color_button.clicked.connect(self.pick_color)
+
+        # Exit Button
         self.exit_button = QPushButton("Exit", self)
         self.exit_button.clicked.connect(QApplication.quit)
 
@@ -36,7 +42,8 @@ class RulerOverlay(QWidget):
         h_layout = QHBoxLayout()
         h_layout.addWidget(self.h_slider)
         h_layout.addStretch()
-        h_layout.addWidget(self.exit_button)
+        h_layout.addWidget(self.color_button)
+        h_layout.addWidget(self.exit_button) 
 
         layout.addLayout(h_layout)
         self.setLayout(layout)
@@ -66,7 +73,7 @@ class RulerOverlay(QWidget):
         v_handle_x = int(v_ratio * self.v_slider.width())
 
         # Draw draggable lines
-        painter.setPen(QPen(QColor(0, 255, 0), 2))
+        painter.setPen(QPen(self.line_color, 2))
         painter.drawLine(self.v_slider.value(), 0, self.v_slider.value(), self.height())
 
         inverted_h_value = self.height() - self.h_slider.value()
@@ -80,6 +87,17 @@ class RulerOverlay(QWidget):
         delta = QPoint(event.globalPos() - self.old_pos)
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.old_pos = event.globalPos()
+
+    def pick_color(self):
+        try:
+            color_dialog = QColorDialog(self)
+            if color_dialog.exec_() == QColorDialog.Accepted:
+                self.line_color = color_dialog.selectedColor()
+                self.update()  # Force a repaint
+        except Exception as e:
+            print(f"Exception encountered: {e}")
+
+# End RulerOverlay class
 
 def manage_gif():
     try:
